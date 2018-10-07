@@ -7,16 +7,17 @@ import collections
 import itertools
 import matplotlib.pyplot as plt
 
-from const import members
+from const import MEMBERS, MEMBERS_EN
 
 
 edge_list = []
 
-
-for i in range(1,107):
+for i in range(1, 107):
     try:
         html = urllib.request.urlopen("http://dl.nkmr-lab.org/papers/"+str(i))
     except urllib.error.HTTPError as e:
+        continue
+    except NameError as e:
         continue
 
     soup = BeautifulSoup(html)
@@ -31,19 +32,27 @@ for i in range(1,107):
     div4 = div3.find_all("div", recursive=False)[0]
     div5 = div4.find("div")
     header = div5.find("header")
-    a_list = header.find_all("a");
+    a_list = header.find_all("a")
 
     main_author = a_list[0].get_text(" ", strip=True)
-    if not main_author in members.keys():
+    if main_author in MEMBERS.keys():
+        main_author = MEMBERS[main_author]
+    elif main_author in MEMBERS_EN.keys():
+        main_author = MEMBERS_EN[main_author]
+    else:
         continue
-    main_author = members[main_author]
+    
 
     for i in range(1, len(a_list)):
         co_author = a_list[i].get_text(" ", strip=True)
-        if not co_author in members.keys():
+        if co_author in MEMBERS.keys():
+            co_author = MEMBERS[co_author]
+        elif co_author in MEMBERS_EN.keys():
+            co_author = MEMBERS_EN[co_author]
+        else:
+            print()
             continue
-        co_author = members[co_author]
-
+        
         if co_author != "PDF":
             print(co_author + " --> " + main_author)
             edge_list.append([co_author, main_author])
@@ -65,13 +74,15 @@ for edge in edge_list:
         else:
             G.add_edge(node0, node1, {"weight":1})
 
+# set anonymous
+# start = 1
+# G = nx.convert_node_labels_to_integers(G,first_label=start)
+
+#pos = nx.spring_layout(G, k=0.6)
+edge_width = [ d["weight"] for (u,v,d) in G.edges(data=True)]
+# nx.draw_networkx(G,pos, width=edge_width) # draw graph with networkx
+nx.nx_agraph.view_pygraphviz(G, prog='fdp') # draw graph with pygraphviz
 
 plt.figure(figsize=(15,15))
-pos = nx.spring_layout(G, k=0.3)
-
-edge_width = [ d["weight"] for (u,v,d) in G.edges(data=True)]
-# nx.draw_networkx(G,pos, width=edge_width) # 無向グラフ
-nx.nx_agraph.view_pygraphviz(G, prog='fdp') # pygraphvizによる有向グラフ
-
 plt.axis("off")
 plt.show()
