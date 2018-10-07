@@ -1,3 +1,5 @@
+# -*- Coding: utf-8 -*-
+
 import urllib.request, urllib.error
 from bs4 import BeautifulSoup
 import networkx as nx
@@ -5,10 +7,13 @@ import collections
 import itertools
 import matplotlib.pyplot as plt
 
+from const import members
+
 
 edge_list = []
 
-for i in range(1,30):
+
+for i in range(1,107):
     try:
         html = urllib.request.urlopen("http://dl.nkmr-lab.org/papers/"+str(i))
     except urllib.error.HTTPError as e:
@@ -19,7 +24,6 @@ for i in range(1,30):
 
     title = soup.find("h1").get_text()
     print( title )
-    # print()
 
     div = soup.find("div")
     div2 = div.find_all("div")[1]
@@ -30,9 +34,16 @@ for i in range(1,30):
     a_list = header.find_all("a");
 
     main_author = a_list[0].get_text(" ", strip=True)
+    if not main_author in members.keys():
+        continue
+    main_author = members[main_author]
 
     for i in range(1, len(a_list)):
         co_author = a_list[i].get_text(" ", strip=True)
+        if not co_author in members.keys():
+            continue
+        co_author = members[co_author]
+
         if co_author != "PDF":
             print(co_author + " --> " + main_author)
             edge_list.append([co_author, main_author])
@@ -41,8 +52,8 @@ for i in range(1,30):
 # print(edge_list)
 
 
-edge_count = collections.Counter(itertools.chain.from_iterable(edge_list)).most_common(50)
-G = nx.Graph()
+edge_count = collections.Counter(itertools.chain.from_iterable(edge_list)).most_common(100)
+G = nx.DiGraph()
 G.add_nodes_from([(edge, {"count":count}) for edge,count in edge_count])
 
 for edge in edge_list:
@@ -56,9 +67,11 @@ for edge in edge_list:
 
 
 plt.figure(figsize=(15,15))
-pos = nx.spring_layout(G)
-nx.draw_networkx(G,pos)
+pos = nx.spring_layout(G, k=0.3)
+
+edge_width = [ d["weight"] for (u,v,d) in G.edges(data=True)]
+# nx.draw_networkx(G,pos, width=edge_width) # 無向グラフ
+nx.nx_agraph.view_pygraphviz(G, prog='fdp') # pygraphvizによる有向グラフ
 
 plt.axis("off")
-plt.savefig("default.png")
 plt.show()
