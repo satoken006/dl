@@ -10,9 +10,10 @@ import matplotlib.pyplot as plt
 from const import MEMBERS, MEMBERS_EN
 
 
+node_size = {}
 edge_list = []
 
-for i in range(1, 107):
+for i in range(1, 143):
     try:
         html = urllib.request.urlopen("http://dl.nkmr-lab.org/papers/"+str(i))
     except urllib.error.HTTPError as e:
@@ -20,7 +21,7 @@ for i in range(1, 107):
     except NameError as e:
         continue
 
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, "lxml")
     # print( soup )
 
     title = soup.find("h1").get_text()
@@ -35,10 +36,23 @@ for i in range(1, 107):
     a_list = header.find_all("a")
 
     main_author = a_list[0].get_text(" ", strip=True)
+
     if main_author in MEMBERS.keys():
         main_author = MEMBERS[main_author]
+
+        if main_author in node_size:
+            node_size[main_author] += 1
+        else:
+            node_size[main_author] = 1
+
     elif main_author in MEMBERS_EN.keys():
         main_author = MEMBERS_EN[main_author]
+
+        if main_author in node_size:
+            node_size[main_author] += 1
+        else:
+            node_size[main_author] = 1
+
     else:
         continue
     
@@ -58,12 +72,14 @@ for i in range(1, 107):
             edge_list.append([co_author, main_author])
     print()
 
+print( node_size )
 # print(edge_list)
 
 
 edge_count = collections.Counter(itertools.chain.from_iterable(edge_list)).most_common(100)
 G = nx.DiGraph()
-G.add_nodes_from([(edge, {"count":count}) for edge,count in edge_count])
+# G.add_nodes_from([(edge, {"count":count}) for edge,count in edge_count])
+G.add_nodes_from([(edge, {"size":11}) for edge,count in edge_count])
 
 for edge in edge_list:
     for node0,node1 in itertools.combinations(edge, 2):
@@ -74,12 +90,15 @@ for edge in edge_list:
         else:
             G.add_edge(node0, node1, {"weight":1})
 
-# set anonymous
+# set labels of nodes anonymous
 # start = 1
 # G = nx.convert_node_labels_to_integers(G,first_label=start)
 
+# G.node_attr['width'] = '0.25'
+# G.node_attr['height'] = '0.25'
+
 #pos = nx.spring_layout(G, k=0.6)
-edge_width = [ d["weight"] for (u,v,d) in G.edges(data=True)]
+# edge_width = [ d["weight"] for (u,v,d) in G.edges(data=True)]
 # nx.draw_networkx(G,pos, width=edge_width) # draw graph with networkx
 nx.nx_agraph.view_pygraphviz(G, prog='fdp') # draw graph with pygraphviz
 
