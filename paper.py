@@ -12,28 +12,25 @@ from const import MEMBERS, MEMBERS_EN
 
 node_size = {}
 edge_list = []
+PAPER_MAX = 146
 
-for i in range(1, 143):
+for i in range(1, PAPER_MAX):
     try:
         html = urllib.request.urlopen("http://dl.nkmr-lab.org/papers/"+str(i))
+        print(str(i) + " / " + str(PAPER_MAX))
     except urllib.error.HTTPError as e:
         continue
     except NameError as e:
         continue
 
     soup = BeautifulSoup(html, "lxml")
-    # print( soup )
 
-    title = soup.find("h1").get_text()
-    print( title )
-
-    div = soup.find("div")
-    div2 = div.find_all("div")[1]
-    div3 = div2.find("div") 
-    div4 = div3.find_all("div", recursive=False)[0]
-    div5 = div4.find("div")
-    header = div5.find("header")
-    a_list = header.find_all("a")
+    titleElem = soup.find("h1")
+    title = titleElem.get_text()
+    print(title)
+    divElem = titleElem.parent
+    a_list = divElem.find_all("a")
+    
 
     main_author = a_list[0].get_text(" ", strip=True)
 
@@ -64,13 +61,11 @@ for i in range(1, 143):
         elif co_author in MEMBERS_EN.keys():
             co_author = MEMBERS_EN[co_author]
         else:
-            print()
             continue
         
         if co_author != "PDF":
             print(co_author + " --> " + main_author)
             edge_list.append([co_author, main_author])
-    print()
 
 print( node_size )
 # print(edge_list)
