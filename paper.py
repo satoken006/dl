@@ -8,13 +8,16 @@ import itertools
 import matplotlib.pyplot as plt
 
 from const import MEMBERS, MEMBERS_EN
-
+from RepositoryParser import RepositoryParser
 
 node_size = {}
 edge_list = []
 PAPER_MAX = 146
+parser = RepositoryParser()
+
 
 for i in range(1, PAPER_MAX):
+    # Connect to the Web and get HTML
     try:
         html = urllib.request.urlopen("http://dl.nkmr-lab.org/papers/"+str(i))
         print(str(i) + " / " + str(PAPER_MAX))
@@ -25,13 +28,8 @@ for i in range(1, PAPER_MAX):
 
     soup = BeautifulSoup(html, "lxml")
 
-    titleElem = soup.find("h1")
-    title = titleElem.get_text()
-    print(title)
-    divElem = titleElem.parent
-    a_list = divElem.find_all("a")
-    
-
+    # Get a main author and co-authors
+    a_list = parser.get_author_list(soup)
     main_author = a_list[0].get_text(" ", strip=True)
 
     if main_author in MEMBERS.keys():
