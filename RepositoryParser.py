@@ -4,6 +4,7 @@ class RepositoryParser:
     def __init__(self):
         print()
 
+    # from HTML
     def get_author_list(self, soup):
         titleElem = soup.find("h1")
         title = titleElem.get_text()
