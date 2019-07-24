@@ -60,11 +60,13 @@ for edge in edge_list:
     for node0,node1 in itertools.combinations(edge, 2):
         if not G.has_node(node0) or not G.has_node(node1):
             continue
-        if G.has_edge(node0, node1):
-            # print(node0, node1, G[node0][node1])
-            G[node0][node1]["weight"] += 1
-        else:
-            G.add_weighted_edges_from([(node0, node1, 1)])
+
+
+        G.add_weighted_edges_from([(node0, node1, 1)])
+        # if G.has_edge(node0, node1):
+        #     # print(node0, node1, G[node0][node1])
+        #     G[node0][node1]["weight"] += 1
+        # else:
 
 # draw graph with pygraphviz
 nx.nx_agraph.view_pygraphviz(G, prog='fdp')
