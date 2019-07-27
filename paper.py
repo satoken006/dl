@@ -12,7 +12,7 @@ from RepositoryParser import RepositoryParser
 
 parser = RepositoryParser()
 edge_list = []
-RANGE = 146
+RANGE = 194
 
 for i in range(1, RANGE + 1):
     # Connect to the Web and get HTML
@@ -53,7 +53,7 @@ for i in range(1, RANGE + 1):
 
 edge_count = collections.Counter(itertools.chain.from_iterable(edge_list)).most_common(100)
 G = nx.DiGraph()
-# G.add_nodes_from([(edge, {"count":count}) for edge,count in edge_count])
+
 G.add_nodes_from([(edge, {"size":11}) for edge,count in edge_count])
 
 for edge in edge_list:
@@ -61,12 +61,7 @@ for edge in edge_list:
         if not G.has_node(node0) or not G.has_node(node1):
             continue
 
-
         G.add_weighted_edges_from([(node0, node1, 1)])
-        # if G.has_edge(node0, node1):
-        #     # print(node0, node1, G[node0][node1])
-        #     G[node0][node1]["weight"] += 1
-        # else:
 
 # draw graph with pygraphviz
 nx.nx_agraph.view_pygraphviz(G, prog='fdp')
